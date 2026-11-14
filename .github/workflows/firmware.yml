@@ -1,0 +1,28 @@
+name: ESP32-S3 compile
+on:
+  push:
+    paths:
+      - 'wireless/firmware/**'
+      - 'scripts/build-firmware.sh'
+      - '.github/workflows/firmware.yml'
+  pull_request:
+    paths:
+      - 'wireless/firmware/**'
+      - 'scripts/build-firmware.sh'
+      - '.github/workflows/firmware.yml'
+permissions:
+  contents: read
+jobs:
+  firmware:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-arduino-cli@v2
+        with:
+          version: '1.x'
+      - run: arduino-cli version
+      - name: Compile 8MB baseline (no PSRAM)
+        run: bash scripts/build-firmware.sh --install-deps
+      - name: Compile original 16MB OPI profile
+        run: bash scripts/build-firmware.sh --original-16mb-opi
