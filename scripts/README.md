@@ -37,7 +37,7 @@ The original build metadata records:
 esp32:esp32:esp32s3:FlashSize=16M,PSRAM=opi,PartitionScheme=app3M_fat9M_16MB,FlashMode=dio,USBMode=hwcdc,CDCOnBoot=cdc,UploadSpeed=921600
 ```
 
-The baseline instead selects 8MB flash, disabled PSRAM and `default_8MB`. The firmware does not use a camera or require PSRAM. This is a proposed portable build target, not a claim that every ESP32-S3 board has been tested. **Neither the new baseline nor the new library pin has been compile-verified in this release preparation**, because the previous temporary Arduino installation had already lost its core metadata and library files. The historical NimBLE version is unknown; 2.5.2 is an explicit new-install pin from https://github.com/h2zero/NimBLE-Arduino/releases/tag/2.5.2, not a recovered historical version. Confirm the actual board's flash and PSRAM before manually uploading; this script has no upload function.
+The baseline instead selects 8MB flash, disabled PSRAM and `default_8MB`. The firmware does not use a camera or require PSRAM. This is a proposed portable build target, not a claim that every ESP32-S3 board has been tested. **Both profiles compile successfully in the clean GitHub Actions Ubuntu runner**, using Arduino CLI 1.6.0, ESP32 core 3.3.7 and NimBLE-Arduino 2.5.2. This is a compile check, not a hardware flash or end-to-end phone test. See [validation](../docs/VALIDATION.md). The historical NimBLE version is unknown; 2.5.2 is an explicit new-install pin from https://github.com/h2zero/NimBLE-Arduino/releases/tag/2.5.2, not a recovered historical version. Confirm the actual board's flash and PSRAM before manually uploading; this script has no upload function.
 
 ## Optional launchd files
 
@@ -60,3 +60,5 @@ This only generates plists pointing at the current checkout. It does not copy a 
 - Fresh Python dependency installation initially hit PyPI CDN read timeouts. A retry using the existing local proxy reached package downloads but remained slow; until installation completes, doctor correctly reports missing Pillow/pyserial in the new environment. Re-run setup with normal PyPI network access.
 - An official Arduino dependency-install attempt reached the registry-index download, but very low CDN/proxy throughput prevented reaching the compiler during release preparation.
 - No hardware upload, service activation, pairing changes, or model calls were performed.
+
+- Full documented setup was also run in a real fresh GitHub clone: its own venv, official UxPlay fetch, repeated patch application, OCR/UxPlay build, all doctor checks, and all 41 tests passed. Both ESP32 profiles subsequently compiled in GitHub Actions; no hardware was flashed.
