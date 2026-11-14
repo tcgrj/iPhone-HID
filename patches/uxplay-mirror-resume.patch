@@ -1,0 +1,27 @@
+--- a/lib/raop_rtp_mirror.c
++++ b/lib/raop_rtp_mirror.c
+@@ -13,6 +13,8 @@
+  *
+  *==================================================================
+  * modified by fduncanh 2021-2023
++ * Modified by TechGe (科技阁), 2026-11-14: resume a suspended renderer
++ * when validated video arrives without the expected codec notifications.
+  */
+ 
+ #include "raop_rtp_mirror.h"
+@@ -554,6 +556,15 @@
+                     prepend_sps_pps =  false;
+                 }
+ 
++                /* Resume on actual validated video as well as codec flags. A
++                 * resumed client may send video without the expected 0x16/0x1e
++                 * codec notification; leaving appsrc paused then stalls JPEG. */
++                if (valid_data && video_stream_suspended) {
++                    logger_log(raop_rtp_mirror->logger, LOGGER_INFO,
++                               "Resuming suspended mirror renderer on valid video data");
++                    raop_rtp_mirror->callbacks.video_resume(raop_rtp_mirror->callbacks.cls);
++                    video_stream_suspended = false;
++                }
+                 raop_rtp_mirror->callbacks.video_process(raop_rtp_mirror->callbacks.cls, raop_rtp_mirror->ntp, &video_data);
+                 free(payload_out);
+                 break;

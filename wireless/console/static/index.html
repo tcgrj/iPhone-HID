@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f2f2f4" />
+    <title>科技阁 · 无线控制 iPhone</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <aside class="rail">
+      <a class="brand" href="#top">科技阁<small>创作中心</small></a>
+      <nav aria-label="控制台导航">
+        <a href="#top" aria-current="page"><small>01</small> 实机控制</a>
+        <a href="#activity-title"><small>02</small> 执行动态</a>
+      </nav>
+      <div class="rail-footer">
+        <span>设备实验室</span><small>Wi-Fi · 蓝牙键鼠</small>
+      </div>
+    </aside>
+    <div class="page" id="top">
+      <header class="topbar">
+        <strong>实机控制</strong>
+        <div class="connections">
+          <span class="local"><i></i> 本机访问</span>
+          <span id="screen-chip" class="pill"><i></i> 等待手机投屏</span>
+          <span id="ble-chip" class="pill"><i></i> 等待蓝牙</span>
+        </div>
+      </header>
+      <main>
+        <div class="intro">
+          <div>
+            <h1>无线控制 iPhone</h1>
+            <p class="subtitle">
+              查看手机画面，通过 Wi-Fi 开发板执行蓝牙键鼠操作。
+            </p>
+          </div>
+        </div>
+
+        <details class="panel network-panel" id="network-panel" open>
+          <summary>开发板网络 <span id="network-state">等待连接</span></summary>
+          <form id="network-form" autocomplete="off">
+            <p>首次配网时接上 USB。连接成功后，开发板可改用独立电源，电脑与开发板保持在同一局域网。</p>
+            <div class="network-fields">
+              <label>2.4 GHz Wi-Fi 名称<input id="wifi-ssid" type="text" required autocomplete="off" /></label>
+              <label>Wi-Fi 密码<input id="wifi-password" type="password" autocomplete="off" /></label>
+              <button class="primary" id="network-submit" type="submit">连接 Wi-Fi</button>
+              <button class="stop" id="network-refresh" type="button">读取已有连接</button>
+            </div>
+            <p id="network-notice" role="status">密码只用于开发板配网，不会写入网页日志。</p>
+          </form>
+        </details>
+
+        <div class="workspace">
+          <div class="main-column">
+            <section class="panel screen-panel" aria-labelledby="screen-title">
+              <div class="panel-head">
+                <h2 id="screen-title">实时画面</h2>
+                <span id="live-chip" class="live-label"><i></i> 等待投屏</span>
+              </div>
+              <div id="viewfinder" class="viewfinder">
+                <img id="screen" alt="iPhone AirPlay 实时屏幕画面" hidden />
+                <div id="screen-empty" class="placeholder">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="6" y="2" width="12" height="20" rx="2" />
+                    <path d="M10 18h4" />
+                  </svg>
+                  <p>等待 iPhone 屏幕画面</p>
+                  <small>打开手机控制中心 → 屏幕镜像<br />选择 TechGe iPhone Screen</small>
+                </div>
+              </div>
+              <div class="screen-footer">
+                <span id="frame-size">iPhone 屏幕</span>
+                <span id="frame-meta">等待画面</span>
+                <a
+                  id="original"
+                  href="/api/frame"
+                  target="_blank"
+                  rel="noopener"
+                  hidden
+                  >查看当前画面 ↗</a
+                >
+              </div>
+            </section>
+
+            <section class="panel compose" aria-labelledby="task-title">
+              <div class="panel-head">
+                <h2 id="task-title">下达任务</h2>
+                <button type="button" id="stop" class="stop" disabled>
+                  停止执行
+                </button>
+              </div>
+              <form id="task-form">
+                <label class="sr-only" for="task">给 iPhone 的任务</label>
+                <textarea
+                  id="task"
+                  name="task"
+                  rows="2"
+                  maxlength="500"
+                  required
+                  placeholder="例如：在控制中心开始录屏，确认录屏按钮变红。"
+                ></textarea>
+                <div class="compose-bottom">
+                  <div class="examples" aria-label="任务示例">
+                    <button type="button" data-example="读取屏幕文字">读取文字</button>
+                    <button
+                      type="button"
+                      data-example="只观察当前屏幕，告诉我现在显示什么，不移动鼠标也不点击。"
+                    >
+                      观察屏幕
+                    </button>
+                    <button
+                      type="button"
+                      data-example="在控制中心点击屏幕录制，确认录屏已经开始。"
+                    >
+                      开始录屏
+                    </button>
+                    <button
+                      type="button"
+                      data-example="在控制中心停止屏幕录制，确认按钮已经恢复灰色。"
+                    >
+                      停止录屏
+                    </button>
+                  </div>
+                  <button id="submit" type="submit" class="primary">
+                    提交任务
+                  </button>
+                </div>
+              </form>
+              <p id="notice" class="notice" role="status">
+                预览在本机显示。简单文字指令优先在本机识别，复杂任务会把相关画面交给 Codex。
+              </p>
+            </section>
+          </div>
+
+          <aside class="side-column">
+            <section class="panel activity" aria-labelledby="activity-title">
+              <div class="panel-head">
+                <h2 id="activity-title">执行动态</h2>
+                <span class="state" id="run-state">空闲</span>
+              </div>
+              <div class="current" id="current">
+                <div class="current-label"><i></i> 当前任务</div>
+                <p id="current-task">等待新任务</p>
+                <small id="queue-label">提交后会在这里显示执行步骤</small>
+              </div>
+              <div class="timeline-title">
+                <span>时间线</span><span id="event-count">0 条</span>
+              </div>
+              <ol id="timeline" class="timeline" aria-label="执行日志">
+                <li class="empty-log">暂时没有执行记录</li>
+              </ol>
+            </section>
+            <section class="panel manual" aria-labelledby="manual-title">
+              <div class="manual-copy">
+                <h2 id="manual-title">手动指针</h2>
+                <p>先移动到屏幕内容，再点击或滑动。</p>
+                <div class="gesture-buttons">
+                  <button type="button" data-key="swipe-up">向上滑动</button>
+                  <button type="button" data-key="swipe-down">向下滑动</button>
+                </div>
+              </div>
+              <div class="pad" aria-label="指针方向键">
+                <button type="button" data-key="up" aria-label="向上移动">
+                  ↑
+                </button>
+                <button type="button" data-key="left" aria-label="向左移动">
+                  ←
+                </button>
+                <button type="button" data-key="click" aria-label="单击">
+                  •
+                </button>
+                <button type="button" data-key="right" aria-label="向右移动">
+                  →
+                </button>
+                <button type="button" data-key="down" aria-label="向下移动">
+                  ↓
+                </button>
+              </div>
+            </section>
+          </aside>
+        </div>
+        <footer id="transport">
+          Mac 通过 Wi-Fi 连接开发板 · iPhone 通过蓝牙连接
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

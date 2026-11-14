@@ -1,0 +1,7 @@
+{
+  "provider": "codex",
+  "transport": "app_server",
+  "model": null,
+  "effort": "low",
+  "keep_awake": false
+}
